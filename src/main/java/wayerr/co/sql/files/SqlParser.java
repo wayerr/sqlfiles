@@ -18,6 +18,9 @@ package wayerr.co.sql.files;
 
 import java.io.IOException;
 import java.io.Reader;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.function.Consumer;
 
@@ -60,6 +63,16 @@ public class SqlParser {
         return new Builder();
     }
 
+    public static SqlParser getDefault() {
+        return new Builder().build();
+    }
+
+    /**
+     * Parse specified sql template to consumer.
+     * @param text template
+     * @param templatesConsumer consumer
+     * @throws IOException
+     */
     public void parse(Reader text, Consumer<SqlTemplate> templatesConsumer) throws IOException {
         TemplateBuilder tb = new TemplateBuilder(templateParser, templatesConsumer);
         ParserContext ctx = new ParserContext();
@@ -70,5 +83,18 @@ public class SqlParser {
         tb.close();
     }
 
+    /**
+     * Parse specified sql template to immutable map of templates. Name of template is a key for map.
+     * @param text template
+     * @return map with (template.name, template) entries.
+     * @throws IOException
+     */
+    public Map<String, SqlTemplate> parseToMap(Reader text) throws IOException {
+        Map<String, SqlTemplate> map = new HashMap<>();
+        parse(text, (template) -> {
+            map.put(template.getName(), template);
+        });
+        return Collections.unmodifiableMap(map);
+    }
 
 }

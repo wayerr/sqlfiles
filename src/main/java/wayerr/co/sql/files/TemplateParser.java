@@ -20,8 +20,7 @@ import wayerr.co.sql.files.SqlTemplate.Field;
 import wayerr.co.sql.files.SqlTemplate.Param;
 
 /**
- * Strategy for parsing of template parts. Note that eachmethod take full 
- * token include type identified (symbols '#', '@' and '$') part.
+ * Strategy for parsing of template parts.
  * @see DefaultTemplateParser
  * @author wayerr
  */
@@ -30,13 +29,12 @@ public interface TemplateParser {
         TemplateBuilder getTemplateBuilder();
         String getString();
     }
-    public Field parseField(Context ctx);
-    public Param parseParam(Context ctx);
+    Field parseField(Context ctx);
+    Param parseParam(Context ctx);
     /**
      * Extract name of template from token. Also may extract some other info like fields, if need.
-     * TODO return SqlTemplateFactory or some like for allow to produce custom object
      * @param ctx
      * @return name of template
      */
-    public String parseTemplate(Context ctx);
+    String parseTemplate(Context ctx);
 }

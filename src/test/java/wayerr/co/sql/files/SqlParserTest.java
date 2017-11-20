@@ -133,7 +133,7 @@ public class SqlParserTest {
                 .addField(F("name", "string"))
                 .addField(F("code", "tinyint"))
                 .addField(F("user", "uuid"))
-                .addParam(P("something", "string", null))
+                .addParam(P("something", "string", SqlTemplate.Direction.INOUT))
                 .query("select\n    pName,  \n    pCode,  \n    pUser   \n from pData where pSomething == ?")
                 .build(), query0);
         assertEquals(SqlTemplate.builder().name("secondQuery")

@@ -9,4 +9,3 @@ select
    (TIMESTAMP '2009-01-01 20:30:40', 2, /*$now type=TIMESTAMP*/),
    (TIMESTAMP '2011-04-13 20:30:40', 3, /*$now type=TIMESTAMP*/)
  );
-/*#FirstExample end*/

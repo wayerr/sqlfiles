@@ -16,6 +16,9 @@
  */
 package wayerr.co.sql.files;
 
+import java.util.HashMap;
+import java.util.Map;
+
 /**
  *
  * @author wayerr
@@ -33,6 +36,7 @@ public class DefaultTemplateParser implements TemplateParser {
         cp.next();
         String name = cp.getValue();
         String type = null;
+        Map<String, String> attrs = null;
         while(!cp.isEnd()) {
             cp.next();
             String key = cp.getKey();
@@ -41,9 +45,11 @@ public class DefaultTemplateParser implements TemplateParser {
                 case "type":
                     type = val;
                     break;
+                default:
+                    attrs = putAttr(attrs, key, val);
             }
         }
-        return new SqlTemplate.Field(name, type);
+        return new SqlTemplate.Field(name, type, attrs);
     }
 
     @Override
@@ -53,6 +59,7 @@ public class DefaultTemplateParser implements TemplateParser {
         String name = cp.getValue();
         String type = null;
         SqlTemplate.Direction direction = null;
+        Map<String, String> attrs = null;
         while(!cp.isEnd()) {
             cp.next();
             String val = cp.getValue();
@@ -68,6 +75,8 @@ public class DefaultTemplateParser implements TemplateParser {
                 case "dir":
                     direction = SqlTemplate.Direction.from(val);
                     break;
+                default:
+                    attrs = putAttr(attrs, key, val);
             }
         }
         if(direction == null) {
@@ -76,7 +85,16 @@ public class DefaultTemplateParser implements TemplateParser {
         return new SqlTemplate.Param(
                 name,
                 type,
+                attrs,
                 direction);
+    }
+
+    private Map<String, String> putAttr(Map<String, String> attrs, String key, String val) {
+        if(attrs == null) {
+            attrs = new HashMap<>();
+        }
+        attrs.put(key, val);
+        return attrs;
     }
 
     @Override

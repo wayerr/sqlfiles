@@ -16,6 +16,9 @@
  */
 package wayerr.co.sql.files;
 
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Objects;
 
 /**
@@ -25,11 +28,13 @@ import java.util.Objects;
 public class NamedChunk {
     protected final String name;
     protected final String type;
+    private final Map<String, String> attributes;
 
-    public NamedChunk(String name, String type) {
+    public NamedChunk(String name, String type, Map<String, String> attributes) {
         Objects.requireNonNull(name, "name is null");
         this.name = name;
         this.type = type;
+        this.attributes = attributes == null? Collections.emptyMap() : Collections.unmodifiableMap(new HashMap<>(attributes));
     }
 
     public String getName() {
@@ -40,11 +45,16 @@ public class NamedChunk {
         return type;
     }
 
+    public Map<String, String> getAttributes() {
+        return attributes;
+    }
+
     @Override
     public int hashCode() {
         int hash = 5;
         hash = 37 * hash + Objects.hashCode(this.name);
         hash = 37 * hash + Objects.hashCode(this.type);
+        hash = 37 * hash + Objects.hashCode(this.attributes);
         return hash;
     }
 
@@ -64,6 +74,9 @@ public class NamedChunk {
             return false;
         }
         if(!Objects.equals(this.type, other.type)) {
+            return false;
+        }
+        if(!Objects.equals(this.attributes, other.attributes)) {
             return false;
         }
         return true;

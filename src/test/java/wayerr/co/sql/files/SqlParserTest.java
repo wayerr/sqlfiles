@@ -20,10 +20,8 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.io.StringReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -131,19 +129,19 @@ public class SqlParserTest {
         System.out.println("List:"+ list);
         final SqlTemplate query0 = list.get(0);
         assertEquals(SqlTemplate.builder().name("fisrtQuery")
-                .addField("name", "string")
-                .addField("code", "tinyint")
-                .addField("user", "uuid")
-                .addParam("something", "string", null)
-                .query("select\n    pName,  \n    pCode,  \n    pUser   \n from pData where pSomething ==  ?")
+                .addField(F("name", "string"))
+                .addField(F("code", "tinyint"))
+                .addField(F("user", "uuid"))
+                .addParam(P("something", "string", null))
+                .query("select\n    pName,  \n    pCode,  \n    pUser   \n from pData where pSomething == ?")
                 .build(), query0);
         assertEquals(SqlTemplate.builder().name("secondQuery")
                 .query("select one, two three from values (1, 2, 3)")
                 .build(), list.get(1));
         assertEquals(SqlTemplate.builder().name("queryWitTestData")
-                .addField("name", "string")
-                .addParam("test", null, SqlTemplate.Direction.IN)
-                .query("select pName  \n from pData where pSomething ==  ?")
+                .addField(F("name", "string"))
+                .addParam(P("test", null, SqlTemplate.Direction.IN))
+                .query("select pName  \n from pData where pSomething == ?")
                 .build(), list.get(2));
         assertEquals(3, list.size());
     }
@@ -156,5 +154,34 @@ public class SqlParserTest {
             parser.parse(r, list::add);
         }
         System.out.println(list);
+        assertEquals(SqlTemplate.builder().name("utfFirst")
+          .addField(F("date", null, "title", "Дата", "javaType", "java.util.Date"))
+          .addField(F("weight", null, "title", "Вес", "javaType", "float"))
+          .addParam(P("id", "INT", null))
+          .query("select\n now(),  \n 17843,   \n        ?\n ;")
+          .build(), list.get(0));
+        assertEquals(SqlTemplate.builder().name("utfSecond")
+          .addParam(P("startDate", "timestamp", null, "title", "Дата начала"))
+          .addParam(P("endDate", "timestamp", null, "title", "Дата окончания"))
+          .addParam(P("devices", null, null))
+          .query("select t.*,\n       'комментарий©™' as comment\n  from telemetry t\n" +
+            " where t.eventtime >= ?\n   and t.eventtime <= ?\n   and t.device = any (?::varchar[])")
+          .build(), list.get(1));
+    }
+
+    private SqlTemplate.Field F(String name, String type, String ... attrs) {
+        return new SqlTemplate.Field(name, type, attrs(attrs));
+    }
+
+    private SqlTemplate.Param P(String name, String type, SqlTemplate.Direction dir, String ... attrs) {
+        return new SqlTemplate.Param(name, type, attrs(attrs), dir);
+    }
+
+    private Map<String, String> attrs(String ... str) {
+        Map<String, String> map = new HashMap<>();
+        for(int i = 0; i < str.length; i += 2) {
+            map.put(str[i], str[i + 1]);
+        }
+        return map;
     }
 }

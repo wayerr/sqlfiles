@@ -125,9 +125,12 @@ public class TemplateBuilder {
     private void processParam(String token) {
         final SqlTemplate.Param param = templateParser.parseParam(new ContextImpl(token));
         params.add(param);
-        // we also may add 'replacer()' concept which will got param and
+        // we also must add 'replacer()' concept which will got param and
         // had replaced it with ':paramName' for example
-        replaceWith(" ? ");
+
+        //note, that we must replace without additional spaces, because code may use parameter in some expressions
+        // which is sensitivity to spaces
+        replaceWith("?");
     }
 
     private void processField(String token) {

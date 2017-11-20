@@ -1,34 +1,15 @@
 
-/*#secondTestQuery*/ --название запроса
+--#utfFirst
 select
- now(), /*@date title=Дата, javaType=java.util.Date*/ -- тут определяется тип и аттрибуты поля
- 17843,  --@weight title=Вес, javaType=float
---тут определеяется параметр запроса id с типом INT, строка `123` для использования в SQL редакторе, т.е. только для тестирования и отладки
+ now(), --@date title=Дата javaType=java.util.Date
+ 17843,  --@weight title=Вес javaType=float
         /*$id type=INT {*/123/*}*/
  ;
-/*#secondTestQuery end*/
 
-/*#getAlarmButtonEvents */
+/*#utfSecond*/
 select t.*,
-       (select tc.comment from telemetrycomments tc where tc.id = t.uid) as comment
+       'комментарий©™' as comment
   from telemetry t
- where t.eventtime >= /*$startDate type=timestamp {*/to_timestamp('20121206000000','YYYYMMDDHH24MISS')/*}*/
-   and t.eventtime <= /*$endDate type=timestamp {*/to_timestamp('20121206235959','YYYYMMDDHH24MISS')/*}*/
-   and (t.provider || ':' || t.deviceid) = any (/*$devices {*/'{"test:test"}'/*}*/::varchar[])
-   and t.eventtype = 'ALARM_BUTTON'
-/*#getAlarmButtonEvents end*/
-/*   После парсинга шаблоны запросов будут преобразованы в код пригодный для выполнения:   */
--- secondTestQuery
-select
- now(),
- 17843,
- ?
- ;
--- getAlarmButtonEvents
-select t.*,
-       (select tc.comment from telemetrycomments tc where tc.id = t.uid) as comment
-  from telemetry t
- where t.eventtime >= ?
-   and t.eventtime <= ?
-   and (t.provider || ':' || t.deviceid) = any (?::varchar[])
-   and t.eventtype = 'ALARM_BUTTON'
+ where t.eventtime >= /*$startDate type=timestamp title="Дата начала" {*/'20121206'//*}*/
+   and t.eventtime <= /*$endDate type=timestamp  title="Дата окончания" {*/'20121206235959'/*}*/
+   and t.device = any (/*$devices {*/'{"test:test"}'/*}*/::varchar[])

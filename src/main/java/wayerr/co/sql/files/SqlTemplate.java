@@ -16,10 +16,7 @@
  */
 package wayerr.co.sql.files;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Contains sql template with descripotion of fileds and parameters.
@@ -74,8 +71,8 @@ public final class SqlTemplate {
      */
     public static class Field extends NamedChunk {
         
-        public Field(String name, String type) {
-            super(name, type);
+        public Field(String name, String type, Map<String, String> attributes) {
+            super(name, type, attributes);
         }
 
         @Override
@@ -83,6 +80,7 @@ public final class SqlTemplate {
             return "Field{" +
                     "name=" + name +
                     ", type=" + type +
+                    ", attributes=" + getAttributes() +
                     '}';
         }
     }
@@ -94,8 +92,8 @@ public final class SqlTemplate {
     public static class Param extends NamedChunk {
         private final Direction direction;
 
-        public Param(String name, String type, Direction direction) {
-            super(name, type);
+        public Param(String name, String type, Map<String, String> attributes, Direction direction) {
+            super(name, type, attributes);
             this.direction = direction == null? Direction.IN : direction;
         }
 
@@ -114,6 +112,7 @@ public final class SqlTemplate {
                     "name=" + name +
                     ", type=" + type +
                     ", direction=" + direction +
+                    ", attributes=" + getAttributes() +
                     '}';
         }
 
@@ -164,20 +163,12 @@ public final class SqlTemplate {
             return this;
         }
 
-        public Builder addField(String name, String type) {
-            return addField(new Field(name, type));
-        }
-
         public Builder addField(Field field) {
             if(fields == null) {
                 fields = new ArrayList<>();
             }
             fields.add(field);
             return this;
-        }
-
-        public Builder addParam(String name, String type, Direction direction) {
-            return addParam(new Param(name, type, direction));
         }
 
         public Builder addParam(Param param) {

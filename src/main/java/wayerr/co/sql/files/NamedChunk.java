@@ -16,8 +16,6 @@
  */
 package wayerr.co.sql.files;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
@@ -34,7 +32,7 @@ public class NamedChunk {
         Objects.requireNonNull(name, "name is null");
         this.name = name;
         this.type = type;
-        this.attributes = attributes == null? Collections.emptyMap() : Collections.unmodifiableMap(new HashMap<>(attributes));
+        this.attributes = Utils.immutableCopy(attributes);
     }
 
     public String getName() {

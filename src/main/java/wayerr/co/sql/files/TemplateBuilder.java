@@ -22,7 +22,7 @@ import java.util.Objects;
 import java.util.function.Consumer;
 
 /**
- *
+ * Assembly template tags into single template.
  * @author wayerr
  */
 public class TemplateBuilder {
@@ -58,9 +58,7 @@ public class TemplateBuilder {
         TEMPLATE, FIELD, PARAM
     }
 
-    private String templateName;
-    private final List<SqlTemplate.Field> fields = new ArrayList<>();
-    private final List<SqlTemplate.Param> params = new ArrayList<>();
+    private final SqlTemplate.Builder builder = new SqlTemplate.Builder();
     private final List<String> queryChunks = new ArrayList<>();
     private final StringBuilder queryBuilder = new StringBuilder();
     private final TemplateParser templateParser;
@@ -102,8 +100,8 @@ public class TemplateBuilder {
                 }
             }
         } 
-        if(templateName == null) {
-            // we not appent anything before template name
+        if(!inBuild()) {
+            // we not append anything before template name
             return;
         }
         if(lastMacro == null) {
@@ -117,6 +115,23 @@ public class TemplateBuilder {
         }
     }
 
+
+    /**
+     * True when build of SqlTemplate in process.
+     * @return true when build in process
+     */
+    public boolean inBuild() {
+        return builder.getName() != null;
+    }
+
+    /**
+     * Get internal template builder. Note that it reused, therefore do not store it anywhere.
+     * @return builder
+     */
+    public SqlTemplate.Builder getBuilder() {
+        return builder;
+    }
+
     private void replaceWith(String replacer) {
         queryChunks.add(replacer);
         replaced = true;
@@ -124,7 +139,7 @@ public class TemplateBuilder {
 
     private void processParam(String token) {
         final SqlTemplate.Param param = templateParser.parseParam(new ContextImpl(token));
-        params.add(param);
+        builder.addParam(param);
         // we also must add 'replacer()' concept which will got param and
         // had replaced it with ':paramName' for example
 
@@ -135,16 +150,16 @@ public class TemplateBuilder {
 
     private void processField(String token) {
         final SqlTemplate.Field field = templateParser.parseField(new ContextImpl(token));
-        fields.add(field);
+        builder.addField(field);
     }
 
     private void processTemplate(String token) {
-        if(templateName != null) {
+        if(inBuild()) {
             buildTemplate();
         }
         final String name = templateParser.parseTemplate(new ContextImpl(token));
         Objects.requireNonNull(name, templateParser + " return null name from " + token);
-        templateName = name;
+        builder.setName(name);
     }
 
     private MacroType detectMacro(String str) {
@@ -180,21 +195,19 @@ public class TemplateBuilder {
     }
 
     private void buildTemplate() {
-        if(templateName == null) {
-            if(!fields.isEmpty() || !params.isEmpty()) {
+        if(!inBuild()) {
+            if(!builder.getFields().isEmpty() || !builder.getParams().isEmpty()) {
                 throw new IllegalStateException("Corrupted state of builder: has fileds or params but name is null");
             }
             return;
         }
         queryBuilder.setLength(0);
         queryChunks.forEach(queryBuilder::append);
-        SqlTemplate st = new SqlTemplate(templateName, queryBuilder.toString().trim(), fields, params);
+        builder.query(queryBuilder.toString().trim());
+        SqlTemplate st = builder.build();
         //clear immediate after build
-        templateName = null;
-        fields.clear();
-        params.clear();
+        builder.clear();
         queryChunks.clear();
-
         consumer.accept(st);
     }
 

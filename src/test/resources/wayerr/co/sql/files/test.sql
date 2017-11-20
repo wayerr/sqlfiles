@@ -1,6 +1,6 @@
 -- some common comment
 
---#fisrtQuery
+--#fisrtQuery title="First query"
 select
     pName, --@name type=string
     pCode, --@code type=tinyint

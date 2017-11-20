@@ -149,13 +149,30 @@ public final class SqlTemplate {
 
     public static class Builder {
         private String name;
-        private List<Field> fields;
-        private List<Param> params;
+        private final List<Field> fields = new ArrayList<>();
+        private final List<Param> params = new ArrayList<>();
+        private final Map<String, String> attributes = new HashMap<>();
         private String query;
+
+        public String getName() {
+            return name;
+        }
+
+        public void setName(String name) {
+            this.name = name;
+        }
 
         public Builder name(String name) {
             this.name = name;
             return this;
+        }
+
+        public String getQuery() {
+            return query;
+        }
+
+        public void setQuery(String query) {
+            this.query = query;
         }
 
         public Builder query(String query) {
@@ -163,31 +180,43 @@ public final class SqlTemplate {
             return this;
         }
 
+        public List<Field> getFields() {
+            return fields;
+        }
+
         public Builder addField(Field field) {
-            if(fields == null) {
-                fields = new ArrayList<>();
-            }
             fields.add(field);
             return this;
         }
 
+        public List<Param> getParams() {
+            return params;
+        }
+
         public Builder addParam(Param param) {
-            if(params == null) {
-                params = new ArrayList<>();
-            }
             params.add(param);
             return this;
         }
 
-        public SqlTemplate build() {
-            return new SqlTemplate(name, query, copy(fields), copy(params));
+        public Map<String, String> getAttributes() {
+            return attributes;
         }
 
-        private <T> List<T> copy(List<T> list) {
-            if(list == null) {
-                return Collections.emptyList();
-            }
-            return new ArrayList<>(list);
+        public Builder putAttribute(String key, String value) {
+            attributes.put(key, value);
+            return this;
+        }
+
+        public void clear() {
+            this.name = null;
+            this.query = null;
+            this.fields.clear();
+            this.params.clear();
+            this.attributes.clear();
+        }
+
+        public SqlTemplate build() {
+            return new SqlTemplate(name, query, fields, params, attributes);
         }
     }
 
@@ -195,21 +224,18 @@ public final class SqlTemplate {
     private final List<Field> fields;
     private final List<Param> params;
     private final String query;
+    private final Map<String, String> attributes;
 
-    SqlTemplate(String name, String query, List<Field> fields, List<Param> params) {
+    SqlTemplate(String name, String query, List<Field> fields, List<Param> params, Map<String, String> attributes) {
         this.name = name;
         this.query = query;
-        this.fields = immutable(fields);
-        this.params = immutable(params);
+        this.fields = Utils.immutableCopy(fields);
+        this.params = Utils.immutableCopy(params);
+        this.attributes = Utils.immutableCopy(attributes);
     }
 
     public static Builder builder() {
         return new Builder();
-    }
-
-    private static <T> List<T> immutable(List<T> list) {
-        // yes i known about 'guava'
-        return Collections.unmodifiableList(new ArrayList<>(list));
     }
 
     public String getName() {
@@ -242,6 +268,7 @@ public final class SqlTemplate {
                 "name=" + name +
                 ", fields=" + fields +
                 ", params=" + params +
+                ", attributes=" + attributes +
                 ", query=" + query +
                 '}';
     }
@@ -252,6 +279,7 @@ public final class SqlTemplate {
         hash = 53 * hash + Objects.hashCode(this.name);
         hash = 53 * hash + Objects.hashCode(this.fields);
         hash = 53 * hash + Objects.hashCode(this.params);
+        hash = 53 * hash + Objects.hashCode(this.attributes);
         hash = 53 * hash + Objects.hashCode(this.query);
         return hash;
     }
@@ -278,6 +306,9 @@ public final class SqlTemplate {
             return false;
         }
         if(!Objects.equals(this.params, other.params)) {
+            return false;
+        }
+        if(!Objects.equals(this.attributes, other.attributes)) {
             return false;
         }
         return true;

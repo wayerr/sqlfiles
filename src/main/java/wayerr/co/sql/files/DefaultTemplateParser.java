@@ -100,7 +100,18 @@ public class DefaultTemplateParser implements TemplateParser {
     @Override
     public String parseTemplate(Context ctx) {
         // we also can define fields here
-        return ctx.getString().trim();
+        MacroParser cp = new MacroParser(ctx.getString(), 0);
+        cp.next();
+        String name = cp.getValue();
+        SqlTemplate.Builder builder = ctx.getTemplateBuilder().getBuilder();
+        while(!cp.isEnd()) {
+            cp.next();
+            String key = cp.getKey();
+            String val = cp.getValue();
+            builder.putAttribute(key, val);
+
+        }
+        return name;
     }
 
     private static class TokenFilterImpl implements TemplateBuilder.TokenFilter {

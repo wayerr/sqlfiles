@@ -129,6 +129,7 @@ public class SqlParserTest {
         System.out.println("List:"+ list);
         final SqlTemplate query0 = list.get(0);
         assertEquals(SqlTemplate.builder().name("fisrtQuery")
+                .putAttribute("title", "First query")
                 .addField(F("name", "string"))
                 .addField(F("code", "tinyint"))
                 .addField(F("user", "uuid"))

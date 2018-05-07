@@ -13,3 +13,6 @@ select one, two three from values (1, 2, 3)
 --#queryWitTestData
 select pName --@name type=string
  from pData where pSomething == /*$ test {*/'code'/*}*/
+
+--#queryWithNativeParam
+select * from pData where pSomething == :test.expr

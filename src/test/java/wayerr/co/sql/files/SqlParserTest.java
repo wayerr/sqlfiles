@@ -144,7 +144,11 @@ public class SqlParserTest {
                 .addParam(P("test", null, SqlTemplate.Direction.IN))
                 .query("select pName  \n from pData where pSomething == ?")
                 .build(), list.get(2));
-        assertEquals(3, list.size());
+        assertEquals(SqlTemplate.builder().name("queryWithNativeParam")
+          .addParam(P("test.expr", null, SqlTemplate.Direction.IN))
+          .query("select * from pData where pSomething == ?")
+          .build(), list.get(3));
+        assertEquals(4, list.size());
     }
 
     @Test

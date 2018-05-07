@@ -22,7 +22,8 @@ Its value will be removed at query generation, but can be used in query test and
 select
  now(), /*@date title=Date javaType=java.util.Date*/ 
  17843,  --@weight type=Wight
-        /*$id type=INT {*/123/*}*/
+        /*$id type=INT {*/123/*}*/,
+        :parameter.name 
  ;
 ```
 
@@ -34,6 +35,8 @@ So, this template engine declare following comment types:
 attributes: 'type' see field attribute with same name, 'dir' - one of IN|OUT|INOUT it a parameter direction. 
 Sample value can be placed in braces like following: `{*/sample value/*}*/`, note that only multiline comments can
  support this syntax.   
+* `:parameter.name` - usual simply way to mape parameters in prepared statements. 
+Usable when you do not need to specify additional metadata.
 
 Parser consume template and provide SqlTemplate object:
 

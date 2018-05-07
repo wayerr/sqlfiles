@@ -38,7 +38,9 @@ class ParserContext implements Token {
     void parse(Reader text) throws IOException {
         while((curr = text.read()) != -1) {
             sb.append((char)curr);
-            if(curr == '\'') {
+            if(state == TokenType.NAMED_PARAM && !isParamChar(curr)) {
+                transfer(TokenType.CODE, 1);
+            } else if(curr == '\'') {
                 if(state == TokenType.STRING) {
                     transfer(TokenType.CODE, 0);
                 } else if(state == TokenType.CODE) {
@@ -62,9 +64,28 @@ class ParserContext implements Token {
                 transfer(TokenType.COMMENT, 2);
             } else if(state == TokenType.COMMENT && matchEnd("*/")) {
                 transfer(TokenType.CODE, 0);
+            } else if(state == TokenType.CODE && matchParam()) {
+                /*matchParam consume 3 symbols*/
+                transfer(TokenType.NAMED_PARAM, 2);
             }
         }
         transfer(null, 0);
+    }
+
+    private boolean matchParam() {
+        int sbOff = sb.length() - 3;
+        if(sbOff < 0) {
+            return false;
+        }
+        // here we match '[^:]:[-.\\w]'
+        // it doing for ignore postgres type casts like '::int'
+        return sb.charAt(sbOff) != ':' &&
+          sb.charAt(sbOff + 1) == ':' &&
+          isParamChar(sb.charAt(sbOff + 2));
+    }
+
+    private boolean isParamChar(int curr) {
+        return curr == '.' || curr == '_' || Character.isLetterOrDigit(curr);
     }
 
     private void transfer(TokenType state, int offset) {
@@ -129,6 +150,9 @@ class ParserContext implements Token {
            case STRING:
                content = raw.substring(1, 1);
                break;
+            case NAMED_PARAM:
+                content = raw.substring(1);
+                break;
         }
         return content;
     }

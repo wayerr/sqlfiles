@@ -27,11 +27,12 @@ public enum TokenType {
     COMMENT_LINE(false),
     QUOTED_IDENTIFIER(true),
     STRING(true),
+    NAMED_PARAM(true),
     ;
 
     private final boolean code;
 
-    private TokenType(boolean code) {
+    TokenType(boolean code) {
         this.code = code;
     }
 

@@ -86,10 +86,12 @@ public class TemplateBuilder {
         }
         TokenType type = token.getType();
         MacroType mt = null;
+        boolean reconstruct = true;
         if(!type.isCode()) {
             String content = token.getContent();
             mt = lastMacro = detectMacro(content);
             if(mt != null) {
+                reconstruct = false;
                 replaced = false;
                 processMacro(content, mt);
                 if(!replaced) {
@@ -99,12 +101,16 @@ public class TemplateBuilder {
                     queryChunks.add(" ");
                 }
             }
-        } 
+        } else if(type == TokenType.NAMED_PARAM) {
+            reconstruct = false;
+            builder.addParam(new SqlTemplate.Param(token.getContent(), null, null, SqlTemplate.Direction.IN));
+            replaceWith("?");
+        }
         if(!inBuild()) {
             // we not append anything before template name
             return;
         }
-        if(lastMacro == null) {
+        if(reconstruct) {
             // we reconstruct code and
             // non macro comments, because it may act as hints for some sql engines
             queryChunks.add(token.getRaw());
